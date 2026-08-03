@@ -1,0 +1,34 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "AI_TRIAGE Output Schema",
+  "description": "Every AI_TRIAGE output must match this structure exactly, or it gets quarantined by JSON_VALIDATION.",
+  "type": "object",
+  "required": ["variant_id", "priority_score", "rules_triggered", "rule_version", "timestamp"],
+  "properties": {
+    "variant_id": {
+      "type": "string",
+      "description": "Unique identifier for the variant, e.g. chr1_12345_A_T"
+    },
+    "priority_score": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 10,
+      "description": "Triage priority, 0 = lowest, 10 = highest"
+    },
+    "rules_triggered": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "List of which rules fired for this variant, e.g. ['high_impact_coding', 'rare_allele']"
+    },
+    "rule_version": {
+      "type": "string",
+      "description": "Version of the rule set used, e.g. v1.0.0 — lets us trace which logic produced this result"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp of when this triage decision was made"
+    }
+  },
+  "additionalProperties": false
+}

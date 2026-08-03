@@ -1,0 +1,12 @@
+{
+  "run_timestamp": "2026-08-02T21:14:23.486119+00:00",
+  "input_vcf": "tests/sample.vcf",
+  "input_vcf_sha256": "0690c3d815f0fad80779f4f5d02420483e6274432121fbe653f4c02d23e58f99",
+  "rule_version": "v1.0.0",
+  "workflow_commit": "8f2a1c9",
+  "workflow_revision": "v0.1.0-summit",
+  "release_version": "0.1.0",
+  "n_valid": 3,
+  "n_quarantined": 0,
+  "validation_status": "PASS"
+}
