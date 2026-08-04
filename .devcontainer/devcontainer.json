@@ -1,0 +1,21 @@
+{
+  "name": "GlassBox Auditing Training",
+  "image": "mcr.microsoft.com/devcontainers/miniconda:latest",
+  "features": {
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {
+      "version": "latest",
+      "moby": false
+    }
+  },
+  "postCreateCommand": "bash .devcontainer/post-install.sh",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "nextflow.nextflow",
+        "ms-python.python",
+        "mhutchie.git-graph"
+      ]
+    }
+  },
+  "remoteUser": "root"
+}
