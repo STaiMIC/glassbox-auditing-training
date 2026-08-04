@@ -5,8 +5,10 @@ audit_bundle.py
 Creates one audit "receipt" record per run, capturing everything needed to trace back exactly what produced a given triage result: input hash,
 rule version, workflow provenance, and validation outcome counts.
 
-All provenance fields are either calculated from a committed artefact (the input file hash) or read from Nextflow's own runtime (commit,
-revision, release version) — none are supplied as a typed argument that a person could enter incorrectly.
+The input file hash is calculated from a committed artefact and cannot be typed wrong.
+
+# DEFECT: sarek_version below is a typed argument a person entered by hand — nothing verifies
+# it's actually true. Compare this to input_vcf_sha256, which is calculated, not typed.
 """
 import sys
 import json
@@ -28,7 +30,7 @@ def count_lines(path):
 
 
 def main(input_vcf, valid_jsonl, quarantine_jsonl, rule_version,
-         workflow_commit, workflow_revision, release_version, out_path):
+         sarek_version, out_path):
     timestamp = datetime.now(timezone.utc).isoformat()
 
     n_valid = count_lines(valid_jsonl)
@@ -46,9 +48,7 @@ def main(input_vcf, valid_jsonl, quarantine_jsonl, rule_version,
         "input_vcf": input_vcf,
         "input_vcf_sha256": sha256_of_file(input_vcf),
         "rule_version": rule_version,
-        "workflow_commit": workflow_commit,
-        "workflow_revision": workflow_revision,
-        "release_version": release_version,
+        "sarek_version": sarek_version,
         "n_valid": n_valid,
         "n_quarantined": n_quarantined,
         "validation_status": validation_status,
@@ -62,11 +62,10 @@ def main(input_vcf, valid_jsonl, quarantine_jsonl, rule_version,
 
 
 if __name__ == "__main__":
-    if len(sys.argv) != 9:
+    if len(sys.argv) != 7:
         sys.exit(
             "Usage: audit_bundle.py <input.vcf> <valid.jsonl> <quarantine.jsonl> "
-            "<rule_version> <workflow_commit> <workflow_revision> "
-            "<release_version> <out.json>"
+            "<rule_version> <sarek_version> <out.json>"
         )
     main(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4],
-         sys.argv[5], sys.argv[6], sys.argv[7], sys.argv[8])
+         sys.argv[5], sys.argv[6])

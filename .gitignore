@@ -1,0 +1,8 @@
+# Nextflow runtime / cache
+.nextflow/
+.nextflow.log*
+work/
+results/
+
+# OS junk
+.DS_Store
