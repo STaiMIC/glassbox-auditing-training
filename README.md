@@ -13,7 +13,7 @@
 
 ---
 
-[Quick Start](#quick-start) · [The Scenario](#the-scenario) · [Repository Structure](#repository-structure)
+[Quick Start](#quick-start) · [The Scenario](#the-scenario) · [What Does This Pipeline Do?](#what-does-this-pipeline-actually-do) · [Repository Structure](#repository-structure)
 
 </div>
 
@@ -59,6 +59,46 @@ The teaching narrative: you've inherited this subworkflow from a colleague. It "
 The real [glassbox-ai-triage](https://github.com/STaiMIC/glassbox-ai-triage) pipeline is built to answer all four automatically. Your job tonight is to find where **this** copy of it quietly fails to.
 
 > ⚠️ **Don't expect this pipeline to run cleanly end-to-end.** Several of the seeded defects will cause odd behavior or outright failure — that's the point. Use `bash -n` on shell scripts before executing them, and read before you run.
+
+---
+
+## What Does This Pipeline Actually Do?
+
+Before auditing *how trustworthy* something is, it helps to know *what it's for*. In plain terms:
+
+After a real tool (`nf-core/sarek`) sequences a patient's DNA and finds thousands of tiny genetic differences called **variants**, this pipeline **triages** them — like a nurse doing hospital triage, deciding what needs attention now versus what can wait. Here, it's deciding which genetic variants look important enough for a human to review.
+
+**Input** — `tests/sample.vcf`, three pretend variants:
+```
+chr1  12345  A→T   quality=45  PASS      depth=25
+chr1  67890  G→GA  quality=12  PASS      depth=8
+chr2  11111  C→T   quality=.   LowQual   depth=3
+```
+
+**Step 1 — `TRIAGE` scores each one** with simple, fixed rules (passed quality filtering? good sequencing depth? etc.) Real output from this exact test file:
+```json
+{"variant_id": "chr1_12345_A_T",  "priority_score": 7, "rules_triggered": ["passed_filter", "high_quality_call", "adequate_depth"]}
+{"variant_id": "chr1_67890_G_GA", "priority_score": 6, "rules_triggered": ["passed_filter", "indel_variant"]}
+{"variant_id": "chr2_11111_C_T",  "priority_score": 0, "rules_triggered": []}
+```
+Variant 1 passed every check — score 7/10, worth a closer look. Variant 3 failed quality filtering outright — score 0, probably safe to ignore.
+
+**Step 2 — `JSON_VALIDATION` checks the output is well-formed** — anything malformed gets quarantined instead of silently passing through and causing problems later.
+
+**Step 3 — `AUDIT_BUNDLE` writes the receipt.** A real one from this repo:
+```json
+{
+  "input_vcf_sha256": "0690c3d815f0fad80779f4f5d02420483e6274432121fbe653f4c02d23e58f99",
+  "rule_version": "v1.0.0",
+  "sarek_version": "sarek-3.9.0",
+  "n_valid": 3,
+  "n_quarantined": 0,
+  "validation_status": "PASS"
+}
+```
+That long hash is a fingerprint of the exact input file — change one letter of the VCF and it looks completely different. That's a fact you can trust. Now look right next to it: `"sarek_version": "sarek-3.9.0"` — someone just typed that. Nothing checks whether it's true. **That contrast, sitting in one file, is the entire lesson of tonight's class in miniature.**
+
+> 💡 **Important honesty note:** the "AI" in this pattern's name isn't real AI — it's simple, fixed, readable rules (if quality > 30, add points; if it's an indel, add points). No machine learning, no black box. That's intentional: you can't audit a black box the same way you can audit code you can read line by line.
 
 ---
 
